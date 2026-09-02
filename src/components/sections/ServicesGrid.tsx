@@ -1,10 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ShieldCheck, HardHat, Truck, Wrench, FileCheck,
-  Umbrella, ArrowRight, Zap, Wind,
-} from "lucide-react";
+import { ShieldCheck, HardHat, Truck, Wrench, FileCheck, Umbrella, ArrowRight, Zap, Wind } from "lucide-react";
 import { SERVICES } from "@/lib/site";
 import { COPY } from "@/lib/content";
 import { FadeIn } from "@/components/animations/FadeIn";
