@@ -62,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     logo: `https://${SITE.domain}/images/og-image.jpg`,
     address: {
       "@type": "PostalAddress",
-      streetAddress: "12220 E Riggs Road, Suite #105",
+      streetAddress: "12220 E Riggs Road, Suite #104",
       addressLocality: "Chandler",
       addressRegion: "AZ",
       postalCode: "85249",

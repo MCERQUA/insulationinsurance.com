@@ -19,7 +19,7 @@ export const SITE = {
   agency: "Contractors Choice Agency",
   agencyFull: "Contractors Choice Agency, LLC",
   address: {
-    street: "12220 E Riggs Road, Suite #105",
+    street: "12220 E Riggs Road, Suite #104",
     city: "Chandler",
     state: "AZ",
     zip: "85249",
