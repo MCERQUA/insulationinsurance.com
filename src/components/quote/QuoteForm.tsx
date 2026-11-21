@@ -8,7 +8,7 @@
 //     (sanitizeYn() runs before every submit; validateQuote() blocks a blank when ynRequired is true).
 //   - Hidden groups (fein, physicalCounty, unselected yn questions) are not posted at all.
 //   - Trade-specific preface questions post as `_info_<name>` (map_quote_125.py skips that prefix; the lead keeps them).
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   YES_NO, ENTITY_TYPES, TRADE_TYPES, US_STATE_CODES, GL_EACH_OCCURRENCE, GL_GENERAL_AGGREGATE, GL_PRODUCTS_COMPOPS,
   GL_PERSONAL_ADV, GL_RENTED_PREMISES, GL_MEDICAL_EXPENSE, LOSS_LINES, OTHER_COVERAGES, SAFETY_ELEMENTS, POOL_FEATURES,
@@ -48,6 +48,9 @@ export interface QuoteFormProps {
   preface?: React.ReactNode
   /** Preface questions specific to the trade (posted as `_info_<name>`). */
   prefaceQuestions?: PrefaceQuestion[]
+  /** Attribution (default true): hidden `traffic_source` + `landing_url`, same derivation as the old AeoFields component.
+   *  Set false only for a site that never had AeoFields. Filled client-side after mount (SSR-safe). */
+  attribution?: boolean
   /** Prefill (e.g. { tradeType: 'Roll-off dumpster rental' }). */
   defaults?: Partial<Flat>
   successMessage?: string
@@ -83,6 +86,21 @@ export function QuoteForm(props: QuoteFormProps) {
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState<'idle' | 'ok' | 'bad'>('idle')
   const [message, setMessage] = useState('')
+  // Attribution (old AeoFields): traffic_source = utm_source | ref | referrer hostname | 'direct'; landing_url = full href. Client-only.
+  const attribution = props.attribution !== false
+  const attr = useRef({ traffic_source: '', landing_url: '' })
+  const [attrVals, setAttrVals] = useState(attr.current)
+  useEffect(() => {
+    if (!attribution) return
+    try {
+      const p = new URLSearchParams(window.location.search)
+      let src = p.get('utm_source') || p.get('ref') || ''
+      if (!src && document.referrer) { try { src = new URL(document.referrer).hostname } catch { src = document.referrer } }
+      if (!src) src = 'direct'
+      attr.current = { traffic_source: src, landing_url: window.location.href }
+      setAttrVals(attr.current)
+    } catch { /* attribution is best-effort, never blocks the form */ }
+  }, [attribution])
 
   const errors = useMemo(() => validateQuote(sanitizeYn(v), new Date(), opts), [v, props.options, props.tradeTypeOptions]) // eslint-disable-line react-hooks/exhaustive-deps
   const pfErrors: Record<string, string> = {}
@@ -250,6 +268,7 @@ export function QuoteForm(props: QuoteFormProps) {
       const payload: Record<string, string> = {}
       for (const f of fieldsFor(opts)) payload[f] = data[f] ?? ''
       for (const q of prefaceQs) payload[`_info_${q.name}`] = pf[q.name] ?? ''
+      if (attribution) { payload.traffic_source = attr.current.traffic_source; payload.landing_url = attr.current.landing_url }
       Object.assign(payload, props.extraFields ?? {})
       const json = props.format === 'json'
       const urlenc = (to: string) => fetch(to, {
@@ -282,6 +301,8 @@ export function QuoteForm(props: QuoteFormProps) {
   return (
     <form name={props.formName} method="POST" data-netlify="true" data-netlify-honeypot="bot-field" noValidate onSubmit={submit} className={C.form}>
       <input type="hidden" name="form-name" value={props.formName} />
+      {attribution && <><input type="hidden" name="traffic_source" value={attrVals.traffic_source} readOnly />
+        <input type="hidden" name="landing_url" value={attrVals.landing_url} readOnly /></>}
       <div style={{ display: 'none' }}><input name="bot-field" tabIndex={-1} autoComplete="off" /></div>
 
       {props.preface}
