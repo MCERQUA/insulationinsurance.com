@@ -170,7 +170,6 @@ export const GENERAL_DETAILS: Record<string, DetailField[]> = {
   ],
   otherInsurance: [
     { key: 'lineOfBusiness', label: 'Line of Business' },
-    { key: 'policyNumber', label: 'Policy Number' },
   ],
   negativeFinancialAction: [
     { key: 'occurenceDate', label: 'Occurrence Date', kind: 'date' },

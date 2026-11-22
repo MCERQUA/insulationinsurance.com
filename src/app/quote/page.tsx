@@ -83,7 +83,7 @@ export default function QuotePage() {
                     format="json"
                     netlifyFallback="/__forms.html"
                     extraFields={{ form_name: "quote", source: SITE.domain }}
-                    options={{ yn: "audit", subcontractedDescriptionRequired: false }}
+                    options={{ yn: true, subcontractedDescriptionRequired: false }}
                     tradeTypeOptions={SERVICE_TYPES}
                     defaults={{ coverageTypes: "General Liability" }}
                     classes={FORM_CLASSES}
